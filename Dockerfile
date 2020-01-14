@@ -1,4 +1,4 @@
-FROM python:stretch
+FROM python:latest
 
 COPY . /app
 WORKDIR /app
