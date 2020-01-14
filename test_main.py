@@ -4,6 +4,8 @@ Tests for jwt flask app.
 import os
 import json
 import pytest
+import unittest
+from unittest.mock import patch
 
 import main
 
@@ -12,29 +14,34 @@ TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NjEzMDY3OTAsIm5iZiI6MT
 EMAIL = 'wolf@thedoor.com'
 PASSWORD = 'huff-puff'
 
-@pytest.fixture
-def client():
-    os.environ['JWT_SECRET'] = SECRET
-    main.APP.config['TESTING'] = True
-    client = main.APP.test_client()
+class FlaskAppTestCase(unittest.TestCase):
+    def setUp(self):
 
-    yield client
+        self.app = main.APP
+        self.client = self.app.test_client
+        self.env = patch.dict('os.environ', {'JWT_SECRET':SECRET})
+        self.user = {
+                        'email': EMAIL,
+                        'password': PASSWORD
+                    }
 
+    def tearDown(self):
+        """Executed after each test"""
+        pass
 
+    def test_health(self):
+        res = self.client().get('/')
+        data = json.loads(res.data)
 
-def test_health(client):
-    response = client.get('/')
-    assert response.status_code == 200
-    assert response.json == 'Healthy'
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data, 'Healthy')
 
+    def test_auth(self):
+        res = self.client().post('/auth', json=self.user)
+        data = json.loads(res.data)
 
-def test_auth(client):
-    body = {'email': EMAIL,
-            'password': PASSWORD}
-    response = client.post('/auth', 
-                           data=json.dumps(body),
-                           content_type='application/json')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['token'])
 
-    assert response.status_code == 200
-    token = response.json['token']
-    assert token is not None
+if __name__ == "__main__":
+    unittest.main()
