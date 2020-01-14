@@ -3,7 +3,6 @@ Tests for jwt flask app.
 '''
 import os
 import json
-import pytest
 import unittest
 from unittest.mock import patch
 
