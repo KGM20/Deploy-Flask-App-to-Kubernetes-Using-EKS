@@ -30,14 +30,14 @@ class FlaskAppTestCase(unittest.TestCase):
 
     def test_health(self):
         res = self.client().get('/')
-        data = json.loads(res.data)
+        data = json.loads(res.data.decode('utf-8'))
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data, 'Healthy')
 
     def test_auth(self):
         res = self.client().post('/auth', json=self.user)
-        data = json.loads(res.data)
+        data = json.loads(res.data.decode('utf-8'))
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['token'])
